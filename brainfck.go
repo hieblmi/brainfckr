@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-const MEM_SIZE int = 1024 * 100
+const MEM_SIZE int = 1024
 
 type bfOperation func()
 
@@ -29,6 +29,8 @@ type Brainfckr struct {
 	mem    []byte
 	memPtr int
 
+	executed []byte
+
 	// map holding functions per operation
 	operations map[byte]bfOperation
 }
@@ -47,30 +49,55 @@ func NewBrainfckr(reader io.Reader, writer io.Writer) *Brainfckr {
 
 func (bf *Brainfckr) opsMapSetup() {
 	bf.operations = make(map[byte]bfOperation)
-	bf.operations['+'] = func() { bf.mem[bf.memPtr]++ }
-	bf.operations['-'] = func() { bf.mem[bf.memPtr]-- }
-	bf.operations['>'] = func() { bf.memPtr++ }
-	bf.operations['<'] = func() { bf.memPtr-- }
+	bf.operations['+'] = func() {
+		bf.mem[bf.memPtr]++
+		bf.executed = append(bf.executed, '+')
+	}
+	bf.operations['-'] = func() {
+		bf.mem[bf.memPtr]--
+		bf.executed = append(bf.executed, '-')
+	}
+	bf.operations['>'] = func() {
+		bf.memPtr++
+		bf.executed = append(bf.executed, '>')
+	}
+	bf.operations['<'] = func() {
+		bf.memPtr--
+		bf.executed = append(bf.executed, '<')
+	}
 	bf.operations[','] = func() {
+		bf.executed = append(bf.executed, ',')
 		bf.mem[bf.memPtr], _ = bufio.NewReader(os.Stdin).ReadByte()
 		bf.mem[bf.memPtr] = bf.mem[bf.memPtr] - 48
 	}
 	bf.operations['.'] = func() {
-		f := bufio.NewWriter(bf.writer)
+		bf.executed = append(bf.executed, '.')
+		/*f := bufio.NewWriter(bf.writer)
 		f.WriteByte(bf.mem[bf.memPtr])
-		//fmt.Printf("%c", bf.mem[bf.memPtr])
-		f.Flush()
+		f.Flush()*/
+		//fmt.Printf("Printing bf.mem[bf.memPtr]=%d\n", bf.mem[bf.memPtr])
+		//f = nil
+		//bf.writer.Write(bf.mem[1:2])
+		b := bf.mem[bf.memPtr]
+		fmt.Printf("%c", b)
+		/*if !unicode.IsSpace(rune(bf.mem[bf.memPtr])) {
+
+		}*/
 	}
 	bf.operations['['] = func() {
+		bf.executed = append(bf.executed, '[')
 		if bf.mem[bf.memPtr] == 0 {
 			bf.skipLoop()
 		} else {
 			bf.code = append(bf.code, '[')
 			bf.stack = bf.stack.Push(0)
 			bf.loop()
+			//bf.debugPrint(fmt.Sprintf("#######END OF MAIN LOOP\n"))
 		}
 	}
-	//bf.operations[']'] = func() {}
+	bf.operations[']'] = func() {
+		bf.executed = append(bf.executed, ']')
+	}
 }
 
 func (bf *Brainfckr) loop() {
@@ -84,14 +111,18 @@ func (bf *Brainfckr) loop() {
 			op, _ = bf.nextOp()
 			bf.code = append(bf.code, op)
 			//fmt.Printf("Added to code segment %s\n", bf.code)
-			
+
 		}
 
 		if op == '[' {
-			if readFromCodeSegment {
-				bf.stack = bf.stack.Push(bf.codePtr - 1)
+			if bf.mem[bf.memPtr] > 0 {
+				if readFromCodeSegment {
+					bf.stack = bf.stack.Push(bf.codePtr - 1)
+				} else {
+					bf.stack = bf.stack.Push(len(bf.code) - 1)
+				}
 			} else {
-				bf.stack = bf.stack.Push(len(bf.code) - 1)
+				bf.skipLoop()
 			}
 			continue
 		} else if op == ']' {
@@ -125,26 +156,31 @@ func (bf *Brainfckr) loop() {
 
 func (bf *Brainfckr) skipLoop() {
 	numberOfOpenBrackets := 1
-	for op, _ := bf.nextOp(); numberOfOpenBrackets > 0; op, _ = bf.nextOp() {
+	//bf.debugPrint("SKIPPING LOOP START\n")
+	for op, _ := bf.nextOp(); numberOfOpenBrackets > 0; {
+		op, _ = bf.nextOp()
 		if op == '[' {
 			numberOfOpenBrackets++
 		} else if op == ']' {
 			numberOfOpenBrackets--
 		}
 	}
+	//bf.debugPrint("SKIPPING LOOP END\n")
 }
 
 func (bf *Brainfckr) nextOp() (byte, error) {
 	b := make([]byte, 1)
 	var err error
 	for {
-		_, err = bf.reader.Read(b); 
+		_, err = bf.reader.Read(b)
 		if err == io.EOF {
 			fmt.Println("EOF")
 			os.Exit(0)
 		}
-		if _, validOp := bf.operations[b[0]]; validOp || b[0] == ']' {
+		if _, validOp := bf.operations[b[0]]; validOp {
 			break
+		} else if b[0] == '$' {
+			//bf.debugPrint("\ndebug;\n")
 		}
 		//fmt.Println("Invalid Op %c\n", b[0])
 	}
@@ -162,12 +198,10 @@ func (bf *Brainfckr) Interpret() error {
 
 func (bf *Brainfckr) debugPrint(msg string) {
 	fmt.Printf(msg)
-	fmt.Printf("\t\tD Memory Content %d\n", bf.mem[:100])
-	// for i := 0; i<100; i++ {
-	// 	fmt.Printf("%c ", bf.mem[i])
-	// }
-	fmt.Println()
-	// fmt.Printf("\t\tD MemPtr % x\n", bf.memPtr)
-	// fmt.Printf("\t\tD Code Segment %s\n", bf.code)
-	// fmt.Printf("\t\tD Stack Size %d\n", len(bf.stack))
+	fmt.Printf("Stack Size %d\n", len(bf.stack))
+	fmt.Printf("CodePtr %d\n", bf.codePtr)
+	fmt.Printf("Code %s\n", bf.code)
+	//fmt.Printf("Executed %s\n", bf.executed)
+	fmt.Printf("MemPtr %d\n", bf.memPtr)
+	fmt.Printf("Memory Content % d\n", bf.mem[:200])
 }

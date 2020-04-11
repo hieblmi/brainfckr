@@ -23,12 +23,15 @@ func run() error {
 	}
 	defer file.Close()
 
-	brainfck := NewBrainfckr(file, os.Stdout)
+	file2, _ := os.Open("test.txt")
+	defer file2.Close()
+
+	//brainfck := NewBrainfckr(file, os.Stdout)
+	brainfck := NewBrainfckr(file, file2)
 	err = brainfck.Interpret()
 	if err != nil {
 		return fmt.Errorf(fmt.Sprintf("Failed to execute the brainfck file: %s, %v\n", *brainfckFile, err))
 	}
 
 	return nil
-
 }
