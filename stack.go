@@ -1,6 +1,4 @@
-
 package main
-
 
 type Stack []int
 
