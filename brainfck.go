@@ -12,35 +12,23 @@ const MEM_SIZE int = 30000
 type bfOperation func()
 
 type Brainfckr struct {
-	// code source
-	reader io.Reader
-	// interpreter output
-	writer io.Writer
-
-	// code stack
-	stack Stack
-
-	// code segment holding code in loops -> ,[>+<-]>.
-	// will be extended if it runs out of space by 2*MAX_FILE_CHUNK_SIZE
-	code    []byte
-	codePtr int
-
-	// memory
-	mem    []byte
-	memPtr int
-
-	executed []byte
-
-	// map holding functions per operation
+	reader     io.Reader
+	writer     io.Writer
+	stack      Stack
+	code       []byte
+	codePtr    int
+	mem        []byte
+	memPtr     int
+	executed   []byte
 	operations map[byte]bfOperation
 }
 
 func NewBrainfckr(reader io.Reader, writer io.Writer) *Brainfckr {
+
 	bf := new(Brainfckr)
 
 	bf.opsMapSetup()
 	bf.mem = make([]byte, MEM_SIZE)
-	bf.memPtr = 0
 	bf.reader = reader
 	bf.writer = writer
 
@@ -74,17 +62,21 @@ func (bf *Brainfckr) opsMapSetup() {
 	}
 	bf.operations['.'] = func() {
 		bf.executed = append(bf.executed, '.')
-		f := bufio.NewWriter(bf.writer)
-		b := bf.mem[bf.memPtr]
-		f.WriteByte(b)
-		f.Flush()
+		bf.print(bf.mem[bf.memPtr])
 	}
 	bf.operations['['] = func() {
 		bf.loop()
 	}
-	bf.operations[']'] = func() {
+	bf.operations[']'] = func() { // does nothing, just there to be a validOp
 		bf.executed = append(bf.executed, ']')
 	}
+}
+
+func (bf *Brainfckr) Interpret() error {
+	for op, err := bf.nextOp(); err != io.EOF; op, err = bf.nextOp() {
+		bf.operations[op]()
+	}
+	return io.EOF
 }
 
 func (bf *Brainfckr) loop() {
@@ -96,15 +88,7 @@ func (bf *Brainfckr) loop() {
 			if bf.mem[bf.memPtr] == 0 { // skip the loop
 				imbalanceCount := 1
 				for imbalanceCount > 0 {
-
-					if bf.codePtr == len(bf.code)-1 {
-						op, _ = bf.nextOp()
-						bf.code = append(bf.code, op)
-					} else {
-						op = bf.code[bf.codePtr+1]
-					}
-					bf.codePtr++
-
+					op = bf.nextLoopOp()
 					if bf.code[bf.codePtr] == ']' {
 						imbalanceCount--
 					} else if bf.code[bf.codePtr] == '[' {
@@ -124,19 +108,22 @@ func (bf *Brainfckr) loop() {
 		} else {
 			bf.operations[op]()
 		}
-
-		bf.codePtr++
-		if bf.codePtr == len(bf.code) {
-			op, _ = bf.nextOp()
-			bf.code = append(bf.code, op)
-		} else {
-			op = bf.code[bf.codePtr]
-		}
-		//bf.debugPrint("")
+		op = bf.nextLoopOp()
 	}
-	//bf.debugPrint("")
 	bf.code = nil
 	bf.codePtr = 0
+}
+
+func (bf *Brainfckr) nextLoopOp() byte {
+	var op byte
+	bf.codePtr++
+	if bf.codePtr == len(bf.code) {
+		op, _ = bf.nextOp()
+		bf.code = append(bf.code, op)
+	} else {
+		op = bf.code[bf.codePtr]
+	}
+	return op
 }
 
 func (bf *Brainfckr) nextOp() (byte, error) {
@@ -144,28 +131,37 @@ func (bf *Brainfckr) nextOp() (byte, error) {
 	var err error
 	for {
 		_, err = bf.reader.Read(b)
-		if err == io.EOF {
-			os.Exit(0)
+		if err != nil {
+			if err == io.EOF {
+				bf.handleEOF()
+			}
 		}
 		if _, validOp := bf.operations[b[0]]; validOp {
 			break
 		} else if b[0] == '$' {
-			//bf.debugPrint("\ndebug;\n")
+			bf.debugOutput("\ndebug;\n")
 		}
 	}
 	return b[0], err
 }
 
-func (bf *Brainfckr) Interpret() error {
-	for op, err := bf.nextOp(); err != io.EOF; op, err = bf.nextOp() {
-		bf.operations[op]()
-	}
-
-	//bf.debugPrint("\n\nEOF\n")
-	return io.EOF
+func (bf *Brainfckr) handleEOF() {
+	bf.print(0x0A)
+	bf.print('E')
+	bf.print('O')
+	bf.print('F')
+	bf.print(0x0A)
+	os.Exit(0)
 }
 
-func (bf *Brainfckr) debugPrint(msg string) {
+func (bf *Brainfckr) print(b byte) {
+	f := bufio.NewWriter(bf.writer)
+	f.WriteByte(b)
+	f.Flush()
+	f = nil
+}
+
+func (bf *Brainfckr) debugOutput(msg string) {
 	fmt.Printf(msg)
 	fmt.Printf("Stack Size %d\n", len(bf.stack))
 	fmt.Printf("CodePtr %d\n", bf.codePtr)
