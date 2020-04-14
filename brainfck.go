@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-const MEM_SIZE int = 30000
+const memSize int = 30000
 
 type bfOperation func()
 
@@ -24,13 +24,13 @@ type Brainfckr struct {
 }
 
 func NewBrainfckr(reader io.Reader, writer io.Writer) *Brainfckr {
-
 	bf := new(Brainfckr)
 
 	bf.opsMapSetup()
-	bf.mem = make([]byte, MEM_SIZE)
+	bf.mem = make([]byte, memSize)
 	bf.reader = reader
 	bf.writer = writer
+	bf.memPtr = memSize / 2
 
 	return bf
 }
@@ -46,23 +46,29 @@ func (bf *Brainfckr) opsMapSetup() {
 		bf.executed = append(bf.executed, '-')
 	}
 	bf.operations['>'] = func() {
-		bf.memPtr++
-		bf.executed = append(bf.executed, '>')
+		if bf.memPtr == memSize-1 {
+			bf.memPtr = 0
+		} else {
+			bf.memPtr++
+		}
+		bf.executed = append(bf.executed, '<')
 	}
 	bf.operations['<'] = func() {
-		if bf.memPtr > 0 {
+		if bf.memPtr == 0 {
+			bf.memPtr = memSize - 1
+		} else {
 			bf.memPtr--
-			bf.executed = append(bf.executed, '<')
 		}
+		bf.executed = append(bf.executed, '<')
 	}
 	bf.operations[','] = func() {
 		bf.executed = append(bf.executed, ',')
-		bf.mem[bf.memPtr], _ = bufio.NewReader(os.Stdin).ReadByte()
-		bf.mem[bf.memPtr] = bf.mem[bf.memPtr]
+		b, _, _ := bufio.NewReader(os.Stdin).ReadLine()
+		bf.mem[bf.memPtr] = b[0] - 48
 	}
 	bf.operations['.'] = func() {
 		bf.executed = append(bf.executed, '.')
-		bf.print(bf.mem[bf.memPtr])
+		_, _ = bf.writer.Write(bf.mem[bf.memPtr : bf.memPtr+1])
 	}
 	bf.operations['['] = func() {
 		bf.loop()
@@ -133,7 +139,7 @@ func (bf *Brainfckr) nextOp() (byte, error) {
 		_, err = bf.reader.Read(b)
 		if err != nil {
 			if err == io.EOF {
-				bf.handleEOF()
+				break
 			}
 		}
 		if _, validOp := bf.operations[b[0]]; validOp {
@@ -143,22 +149,6 @@ func (bf *Brainfckr) nextOp() (byte, error) {
 		}
 	}
 	return b[0], err
-}
-
-func (bf *Brainfckr) handleEOF() {
-	bf.print(0x0A)
-	bf.print('E')
-	bf.print('O')
-	bf.print('F')
-	bf.print(0x0A)
-	os.Exit(0)
-}
-
-func (bf *Brainfckr) print(b byte) {
-	f := bufio.NewWriter(bf.writer)
-	f.WriteByte(b)
-	f.Flush()
-	f = nil
 }
 
 func (bf *Brainfckr) debugOutput(msg string) {
