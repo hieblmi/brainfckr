@@ -26,7 +26,9 @@ func run() error {
 	defer file.Close()
 
 	fmt.Println()
-	brainfckr := NewBrainfckr(file, os.Stdout)
+	programInput := os.Stdin
+	output := os.Stdout
+	brainfckr := NewBrainfckr(file, programInput, output)
 	err = brainfckr.Interpret()
 	if err != io.EOF {
 		return fmt.Errorf(fmt.Sprintf("Failed to execute the brainfck file: %s, %v\n", *fileName, err))

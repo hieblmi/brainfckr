@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -13,6 +12,7 @@ type bfOperation func()
 
 type Brainfckr struct {
 	reader     io.Reader
+	input      io.Reader
 	writer     io.Writer
 	stack      Stack
 	code       []byte
@@ -23,12 +23,13 @@ type Brainfckr struct {
 	operations map[byte]bfOperation
 }
 
-func NewBrainfckr(reader io.Reader, writer io.Writer) *Brainfckr {
+func NewBrainfckr(reader io.Reader, input io.Reader, writer io.Writer) *Brainfckr {
 	bf := new(Brainfckr)
 
 	bf.opsMapSetup()
 	bf.mem = make([]byte, memSize)
 	bf.reader = reader
+	bf.input = input
 	bf.writer = writer
 	bf.memPtr = memSize / 2
 
@@ -62,9 +63,14 @@ func (bf *Brainfckr) opsMapSetup() {
 		bf.executed = append(bf.executed, '<')
 	}
 	bf.operations[','] = func() {
+		b := []byte{0}
+		bf.input.Read(b)
+		if bf.input == os.Stdin {
+			bf.mem[bf.memPtr] = b[0] - 48 // account for ascii offset
+			bf.input.Read(b)              // skip CR
+		}
+		bf.mem[bf.memPtr] = b[0]
 		bf.executed = append(bf.executed, ',')
-		b, _, _ := bufio.NewReader(os.Stdin).ReadLine()
-		bf.mem[bf.memPtr] = b[0] - 48
 	}
 	bf.operations['.'] = func() {
 		bf.executed = append(bf.executed, '.')
