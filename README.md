@@ -41,7 +41,14 @@ CodePtr 7
 Code [>++[.-<b>]</b>
 Executed ++<++.-.-
 Memory Content [ 2  0  0  0  0  0  0  0  0  0]
+.
+.
+.
+CodePtr 8
+Code [>++[.-]<
+Executed ++<++.-.-
+Memory Content [ 2  0  0  0  0  0  0  0  0  0]
 </pre>
 
-In line 23 the CodePtr jumps from byte 7 to byte 4 in the next operation indicating that we are reading from the code segement.
+The codePtr jump from instruction at byte 7 to byte 4 indicates that we are reading from the code segement. Once the inner loop ran we are expanding the code segment with the next instruction from the stream ```<``` and increment the codePtr to 8.
 
