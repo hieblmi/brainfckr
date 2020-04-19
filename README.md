@@ -41,5 +41,6 @@ Code [>++[.-<b>]</b>
 Executed ++<++.-.-
 Memory Content [ 2  0  0  0  0  0  0  0  0  0]
 <\pre>
+
 In line 23 the CodePtr jumps from byte 7 to byte 4 in the next operation indicating that we are reading from the code segement.
 
