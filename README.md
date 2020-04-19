@@ -15,32 +15,32 @@ Another point to note is how loops are executed when code is read from a stream.
 |		]	   | 	if the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to the next command, jump it back to the command after the matching '[' command.		   |
 
 Since we are not looking ahead for a matching ']' at the beginning of loop Brainfckr holds looping code in memory for execution until the most outer loop sees it's loop counter at 0. To determine whether to read the next code byte from the IO stream or from the code segment in memory ```func (bf *Brainfckr) nextLoopOp() byte``` checks if the code pointer sits at the end of the code segment. If so we need to get our next instruction from the stream. Otherwise we can just read a previously stored instruction from the code segment. To furhter clarify this consider the debug output ```bf.debugOutput(string)``` for the following interleaving loops. ```++[>++[.-]<-]```
-```
-CodePtr **6**
-Code [>++[.**-**
+<pre>
+CodePtr <b>6</b>
+Code [>++[.<b>-</b>
 Executed ++<++.
 Memory Content [ 2  2  0  0  0  0  0  0  0  0]
-CodePtr **7**
-Code [>++[.-**]**
+CodePtr <b>7</b>
+Code [>++[.-<b>]</b>
 Executed ++<++.-
 Memory Content [ 2  1  0  0  0  0  0  0  0  0]
-CodePtr **4**
-Code [>++**[**.-]
+CodePtr <b>4</b>
+Code [>++<b>[</b>.-]
 Executed ++<++.-
 Memory Content [ 2  1  0  0  0  0  0  0  0  0]
 CodePtr 5
-Code [>++[**.**-]
+Code [>++[<b>.</b>-]
 Executed ++<++.-
 Memory Content [ 2  1  0  0  0  0  0  0  0  0]
 CodePtr 6
-Code [>++[.**-**]
+Code [>++[.<b>-</b>]
 Executed ++<++.-.
 Memory Content [ 2  1  0  0  0  0  0  0  0  0]
 CodePtr 7
-Code [>++[.-**]**
+Code [>++[.-<b>]</b>
 Executed ++<++.-.-
 Memory Content [ 2  0  0  0  0  0  0  0  0  0]
-```
+<\pre>
 
 
 
