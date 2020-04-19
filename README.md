@@ -1,7 +1,8 @@
 # Brainfckr
 A streaming interpreter for [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) in [Golang](https://github.com/golang/go/wiki/WhyGo)
 
-# I appreciate comments and findings sent to https://hieblmi.com/contact
+# I appreciate comments and findings
+https://hieblmi.com/contact
 
 ## How it works
 Brainfckr performs input and output operations on Go's simplest streaming IO primitives, io.Reader and io.Writer. 
