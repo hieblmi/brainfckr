@@ -16,7 +16,7 @@ Another point to note is how loops are executed when code is read from a stream.
 
 Since we are not looking ahead for a matching ']' at the beginning of loop Brainfckr holds looping code in memory for execution until the most outer loop sees it's loop counter at 0. To determine whether to read the next code byte from the IO stream or from the code segment in memory ```func (bf *Brainfckr) nextLoopOp() byte``` checks if the code pointer sits at the end of the code segment. If so we need to get our next instruction from the stream. Otherwise we can just read a previously stored instruction from the code segment. To furhter clarify this consider the debug output ```bf.debugOutput(string)``` for the following interleaving loops. ```++[>++[.-]<-]```
 <pre>
-CodePtr <font color="red">6</font>
+CodePtr <b>6</b>
 Code [>++[.<b>-</b>
 Executed ++<++.
 Memory Content [ 2  2  0  0  0  0  0  0  0  0]
@@ -41,6 +41,5 @@ Code [>++[.-<b>]</b>
 Executed ++<++.-.-
 Memory Content [ 2  0  0  0  0  0  0  0  0  0]
 <\pre>
-
-
+In line 23 the CodePtr jumps from byte 7 to byte 4 in the next operation indicating that we are reading from the code segement.
 
