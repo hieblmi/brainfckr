@@ -11,7 +11,6 @@ While this seems more elegant it requires more IO operations for large code inpu
 Another point to note is how loops are executed when code is read from a stream. 
 | loop instruction  | meaning   |
 |---|---|
-
 |		[	   | if the byte at the data pointer is zero, then instead of moving the instruction pointer forward to the next command, jump it forward to the command after the matching ] command.		   |
 |		]	   | 	if the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to the next command, jump it back to the command after the matching [ command.		   |
 Since we can't look ahead 
