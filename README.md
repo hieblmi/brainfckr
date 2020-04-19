@@ -1,6 +1,7 @@
 # Brainfckr
 A streaming interpreter for [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) in [Golang](https://github.com/golang/go/wiki/WhyGo)
 | instruction  | meaning   |
+|---|---|
 |		>	   | increment the data pointer (to point to the next cell to the right).		   |
 |		<	   | decrement the data pointer (to point to the next cell to the left).		   |
 |		+	   | increment (increase by one) the byte at the data pointer.		   |
