@@ -1,8 +1,16 @@
 # Brainfckr
 A streaming interpreter for [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) in [Golang](https://github.com/golang/go/wiki/WhyGo)
 
-# I appreciate comments and findings
+## I appreciate comments and findings
 https://hieblmi.com/contact
+
+## Example
+```
+michi@nds% echo "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>." > test.bf
+michi@nds % ./brainfck -f test.bf
+Hello World!
+michi@nds % 
+```
 
 ## How it works
 Brainfckr performs input and output operations on Go's simplest streaming IO primitives, io.Reader and io.Writer. 
