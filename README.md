@@ -8,8 +8,8 @@ https://hieblmi.com/contact
 ```
 michi@nds: echo "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>." > test.bf
 michi@nds: ./brainfck -f test.bf
+
 Hello World!
-michi@nds: 
 ```
 
 ## How it works
