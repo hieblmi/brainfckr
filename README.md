@@ -6,10 +6,10 @@ https://hieblmi.com/contact
 
 ## Example
 ```
-michi@nds% echo "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>." > test.bf
-michi@nds % ./brainfck -f test.bf
+michi@nds: echo "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>." > test.bf
+michi@nds: ./brainfck -f test.bf
 Hello World!
-michi@nds % 
+michi@nds: 
 ```
 
 ## How it works
