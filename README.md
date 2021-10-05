@@ -17,7 +17,7 @@ Brainfckr performs input and output operations on Go's simplest streaming IO pri
 ```
 func NewBrainfckr(code io.Reader, input io.Reader, writer io.Writer) *Brainfckr
 ```
-Rather than loading the complete code into memory Brainfckr reads brainfuck code, executes it on program input and streams output on-the-fly.
+Rather than loading the complete code into memory Brainfckr streams brainfuck code input and executes it on the fly.
 While this seems more elegant it requires more IO operations for large code inputs compared to one big ```ioutil.ReadAll``` at the very start of the execution.
 Another point to note is how loops are executed when code is read from a stream. 
 | loop instruction  | meaning   |
