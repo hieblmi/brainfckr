@@ -1,9 +1,6 @@
 # Brainfckr
 A streaming interpreter for [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) in [Golang](https://github.com/golang/go/wiki/WhyGo)
 
-## I appreciate comments and findings
-hieblmi@protonmail.com
-
 ## Example
 ```
 michi@nds: echo "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>." > test.bf
