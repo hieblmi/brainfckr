@@ -3,8 +3,8 @@ A streaming interpreter for [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck)
 
 ## Example
 ```
-michi@nds: echo "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>." > test.bf
-michi@nds: ./brainfck -f test.bf
+$: echo "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>." > test.bf
+$: ./brainfck -f test.bf
 
 Hello World!
 ```
